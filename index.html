@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTL Lost & Found</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --text-secondary: #6b7280;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --found-bg: #d1fae5;
+            --found-text: #065f46;
+            --lost-bg: #fee2e2;
+            --lost-text: #991b1b;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #111827;
+            --card-bg: #1f2937;
+            --text-color: #f9fafb;
+            --text-secondary: #9ca3af;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --border-color: #374151;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --found-bg: #064e3b;
+            --found-text: #d1fae5;
+            --lost-bg: #7f1d1d;
+            --lost-text: #fee2e2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .logo p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card span {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .stat-card h3 {
+            font-size: 22px;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        /* Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box, .filter-select {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* Quick Tags */
+        .quick-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .tag-chip {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .tag-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 160px;
+            background-color: var(--border-color);
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+
+        .badge.lost { background-color: var(--lost-bg); color: var(--lost-text); }
+        .badge.found { background-color: var(--found-bg); color: var(--found-text); }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            flex: 1;
+        }
+
+        .card-footer {
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .claim-btn {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .claim-btn:hover { background: var(--primary); color: white; }
+
+        /* Sidebar Widgets */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .widget {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .widget h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .places-list {
+            list-style: none;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .places-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .places-list li:last-child { border-bottom: none; }
+
+        .karma-list { list-style: none; }
+        .karma-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .karma-item:last-child { border-bottom: none; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 100;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .modal-content h2 { margin-bottom: 20px; font-size: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; margin-bottom: 5px; color: var(--text-secondary); }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+        .close-modal {
+            position: absolute; top: 20px; right: 20px;
+            background: none; border: none; font-size: 20px;
+            cursor: pointer; color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <div class="container">
+        <!-- Шапка -->
+        <header>
+            <div class="logo">
+                <h1>KTL Lost & Found</h1>
+                <p>Официальный сервис поиска потерянных вещей в лицее</p>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()">🌓 Тема</button>
+                <button class="btn" onclick="openModal()">+ Подать объявление</button>
+            </div>
+        </header>
+
+        <!-- Статистика -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <span>Активных заявок</span>
+                <h3 id="statActive">0</h3>
+            </div>
+            <div class="stat-card">
+                <span>Успешно возвращено</span>
+                <h3>24 вещи</h3>
+            </div>
+            <div class="stat-card">
+                <span>Главная точка сбора</span>
+                <h3 style="font-size: 16px; margin-top: 8px;">Вахта / Кабинет замдиректора</h3>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- Основная часть -->
+            <div>
+                <div class="controls">
+                    <input type="text" id="searchInput" class="search-box" placeholder="Поиск (например: куртка, телефон, пенал...)" oninput="filterCards()">
+                    <select id="statusFilter" class="filter-select" onchange="filterCards()">
+                        <option value="all">Все статусы</option>
+                        <option value="lost">Потеряно</option>
+                        <option value="found">Найдено</option>
+                    </select>
+                    <select id="categoryFilter" class="filter-select" onchange="filterCards()">
+                        <option value="all">Все категории</option>
+                        <option value="Электроника">Электроника</option>
+                        <option value="Одежда">Одежда</option>
+                        <option value="Книги">Книги / Тетради</option>
+                        <option value="Разное">Разное</option>
+                    </select>
+                </div>
+
+                <!-- Быстрые теги -->
+                <div class="quick-tags">
+                    <span class="tag-chip" onclick="setSearchTag('бомбер')">🧥 Бомбер / Куртка</span>
+                    <span class="tag-chip" onclick="setSearchTag('наушники')">🎧 Наушники</span>
+                    <span class="tag-chip" onclick="setSearchTag('телефон')">📱 Телефон</span>
+                    <span class="tag-chip" onclick="setSearchTag('ключи')">🔑 Ключи</span>
+                    <span class="tag-chip" onclick="setSearchTag('пенал')">✏️ Пенал</span>
+                </div>
+
+                <!-- Сетка карточек -->
+                <div class="cards-grid" id="cardsGrid"></div>
+            </div>
+
+            <!-- Сайдбар -->
+            <div class="sidebar">
+                <div class="widget">
+                    <h3>📍 Где искать забытое?</h3>
+                    <ul class="places-list">
+                        <li><span>Столовая (у поваров)</span> <strong>Часто</strong></li>
+                        <li><span>Спортзал (раздевалка)</span> <strong>Часто</strong></li>
+                        <li><span>Вахта лицея</span> <strong>Всегда</strong></li>
+                        <li><span>Кабинет дежурного учителя</span> <strong>Редко</strong></li>
+                    </ul>
+                </div>
+
+                <div class="widget">
+                    <h3>🏆 Топ помощников недели</h3>
+                    <ul class="karma-list">
+                        <li class="karma-item"><span>1. Алихан (10 «А»)</span> <strong>+5 вещ.</strong></li>
+                        <li class="karma-item"><span>2. Диас (11 «Б»)</span> <strong>+3 вещ.</strong></li>
+                        <li class="karma-item"><span>3. Санжар (9 «В»)</span> <strong>+2 вещ.</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal" id="postModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <h2>Новое объявление</h2>
+            <form id="itemForm" onsubmit="addItem(event)">
+                <div class="form-group">
+                    <label>Тип объявления</label>
+                    <select id="itemType" class="form-control">
+                        <option value="lost">Я потерял вещь</option>
+                        <option value="found">Я нашел вещь</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select id="itemCategory" class="form-control">
+                        <option value="Электроника">Электроника</option>
+                        <option value="Одежда">Одежда</option>
+                        <option value="Книги">Книги / Тетради</option>
+                        <option value="Разное">Разное</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Название вещи (пиши подробно, подберется фото)</label>
+                    <input type="text" id="itemName" class="form-control" placeholder="Например: Синий бомбер Nike" required>
+                </div>
+                <div class="form-group">
+                    <label>Место в лицее</label>
+                    <input type="text" id="itemLocation" class="form-control" placeholder="Например: Возле столовой" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание / Особенность</label>
+                    <input type="text" id="itemDesc" class="form-control" placeholder="Например: Размер M, есть нашивка" required>
+                </div>
+                <div class="form-group">
+                    <label>Связь (Telegram / Имя и класс)</label>
+                    <input type="text" id="itemContact" class="form-control" placeholder="@username или Данияр 11А" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Опубликовать</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Исходные данные с примерами
+        let items = [
+            {
+                id: 1,
+                type: 'lost',
+                category: 'Одежда',
+                name: 'Синий бомбер утепленный',
+                location: 'Гардероб / Раздевалка',
+                desc: 'На рукаве небольшая потертость',
+                contact: 'Тимур (10 «Б»)'
+            },
+            {
+                id: 2,
+                type: 'found',
+                category: 'Электроника',
+                name: 'Белые беспроводные наушники',
+                location: 'Кабинет физики',
+                desc: 'Лежат в белом кейсе',
+                contact: '@ernar_ktl'
+            },
+            {
+                id: 3,
+                type: 'found',
+                category: 'Разное',
+                name: 'Связка ключей от шкафчика',
+                location: 'Коридор 2 этажа',
+                desc: 'С брелком в виде мяча',
+                contact: 'Вахта лицея'
+            }
+        ];
+
+        // Функция автоматического подбора картинки по ключевым словам в названии
+        function getImageForKeyword(name) {
+            const text = name.toLowerCase();
+            if (text.includes('бомбер') || text.includes('куртк') || text.includes('пальто') || text.includes('кофт')) {
+                return 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&auto=format&fit=crop&q=60'; // Куртка
+            } else if (text.includes('наушник') || text.includes('airpods') || text.includes('аирподс')) {
+                return 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&auto=format&fit=crop&q=60'; // Наушники
+            } else if (text.includes(' телефон') || text.includes('айфон') || text.includes(' смартфон') || text.includes('samsung')) {
+                return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=60'; // Телефон
+            } else if (text.includes('ключ')) {
+                return 'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=500&auto=format&fit=crop&q=60'; // Ключи
+            } else if (text.includes('пенал') || text.includes('ручки') || text.includes('тетрад') || text.includes('книг')) {
+                return 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=500&auto=format&fit=crop&q=60'; // Канцелярия
+            }
+            // Дефолтная картинка для всего остального
+            return 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=500&auto=format&fit=crop&q=60';
+        }
+
+        function renderCards(dataToRender) {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            document.getElementById('statActive').innerText = dataToRender.length;
+
+            if (dataToRender.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 20px;">По вашему запросу ничего не найдено</p>';
+                return;
+            }
+
+            dataToRender.forEach(item => {
+                const badgeClass = item.type === 'lost' ? 'lost' : 'found';
+                const badgeText = item.type === 'lost' ? '🔴 Потеряно' : '🟢 Найдено';
+                const imageUrl = getImageForKeyword(item.name);
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${imageUrl}" class="card-img" alt="Фото вещи">
+                    <div class="card-content">
+                        <span class="badge ${badgeClass}">${badgeText}</span>
+                        <h3 class="card-title">${item.name}</h3>
+                        <p class="card-desc">📍 ${item.location}<br>📝 ${item.desc}</p>
+                        <div class="card-footer">
+                            <span>${item.contact}</span>
+                            <button class="claim-btn" onclick="alert('Контакты для связи: ${item.contact}')">Связаться</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCards() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+
+            const filtered = items.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(search) || item.desc.toLowerCase().includes(search);
+                const matchesStatus = status === 'all' || item.type === status;
+                const matchesCategory = category === 'all' || item.category === category;
+                return matchesSearch && matchesStatus && matchesCategory;
+            });
+
+            renderCards(filtered);
+        }
+
+        function setSearchTag(keyword) {
+            document.getElementById('searchInput').value = keyword;
+            filterCards();
+        }
+
+        function openModal() { document.getElementById('postModal').classList.add('active'); }
+        function closeModal() { document.getElementById('postModal').classList.remove('active'); }
+
+        function addItem(e) {
+            e.preventDefault();
+            const newItem = {
+                id: Date.now(),
+                type: document.getElementById('itemType').value,
+                category: document.getElementById('itemCategory').value,
+                name: document.getElementById('itemName').value,
+                location: document.getElementById('itemLocation').value,
+                desc: document.getElementById('itemDesc').value,
+                contact: document.getElementById('itemContact').value
+            };
+
+            items.unshift(newItem);
+            filterCards();
+            closeModal();
+            document.getElementById('itemForm').reset();
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+        }
+
+        renderCards(items);
+    </script>
+</body>
+</html>
